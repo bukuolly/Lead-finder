@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swansea Lead Finder — Website Sales CRM</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#080b12;
+  --card:#10141f;
+  --card2:#171d2e;
+  --border:#1f2840;
+  --border2:#2a3550;
+  --accent:#00e5b0;
+  --accent-dim:rgba(0,229,176,0.1);
+  --blue:#4d8bf0;
+  --blue-dim:rgba(77,139,240,0.1);
+  --text:#dce5f5;
+  --muted:#5a6a8a;
+  --muted2:#8595b5;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ── SETUP ── */
+#setup{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 25% 20%,rgba(0,229,176,0.07) 0%,transparent 55%),
+             radial-gradient(ellipse at 80% 85%,rgba(77,139,240,0.07) 0%,transparent 55%),
+             var(--bg);
+}
+.setup-card{
+  width:100%;max-width:520px;padding:52px;
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5);
+}
+.logo-tag{
+  font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:28px;
+  display:flex;align-items:center;gap:10px;
+}
+.logo-tag::before{content:'';width:28px;height:2px;background:var(--accent);border-radius:2px;}
+.setup-h1{font-family:'Syne',sans-serif;font-size:34px;font-weight:800;line-height:1.1;margin-bottom:14px;}
+.setup-h1 em{font-style:normal;color:var(--accent);}
+.setup-sub{color:var(--muted2);font-size:15px;line-height:1.65;margin-bottom:36px;}
+.field-label{font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:8px;}
+.field-input{
+  width:100%;padding:14px 16px;background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;
+  outline:none;transition:border-color 0.2s;
+}
+.field-input:focus{border-color:var(--accent);}
+.field-input::placeholder{color:var(--muted);}
+.btn-go{
+  width:100%;margin-top:20px;padding:16px;background:var(--accent);color:#080b12;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:14px;letter-spacing:0.08em;
+  text-transform:uppercase;border:none;border-radius:10px;cursor:pointer;
+  transition:all 0.2s;box-shadow:0 0 30px rgba(0,229,176,0.2);
+}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 6px 40px rgba(0,229,176,0.4);}
+.setup-note{margin-top:24px;font-size:13px;color:var(--muted);line-height:1.7;}
+.setup-note a{color:var(--accent);text-decoration:none;}
+.setup-note strong{color:var(--muted2);}
+
+/* ── APP SHELL ── */
+#app{display:none;min-height:100vh;}
+.topbar{
+  height:58px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 20px rgba(0,0,0,0.3);
+}
+.topbar-brand{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;}
+.topbar-brand em{font-style:normal;color:var(--accent);}
+.key-badge{
+  font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);
+  background:var(--card2);border:1px solid var(--border);padding:5px 11px;border-radius:6px;
+  cursor:pointer;transition:border-color 0.2s;
+}
+.key-badge:hover{border-color:var(--border2);color:var(--muted2);}
+.tabs-bar{
+  display:flex;gap:4px;padding:14px 32px;
+  background:var(--card);border-bottom:1px solid var(--border);
+}
+.tab{
+  padding:8px 22px;border-radius:8px;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:none;
+  background:transparent;color:var(--muted);transition:all 0.2s;
+}
+.tab.on{background:var(--accent-dim);color:var(--accent);}
+.tab:hover:not(.on){color:var(--text);background:rgba(255,255,255,0.04);}
+
+/* ── PANELS ── */
+.panel{padding:32px;max-width:1100px;margin:0 auto;display:none;}
+.panel.on{display:block;}
+.panel-title{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);margin-bottom:20px;}
+
+/* ── CATEGORIES ── */
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-bottom:24px;}
+.cat-btn{
+  padding:10px 13px;background:var(--card);border:1px solid var(--border);border-radius:9px;
+  color:var(--muted2);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;
+  text-align:left;display:flex;align-items:center;gap:9px;
+}
+.cat-btn:hover{border-color:var(--border2);color:var(--text);}
+.cat-btn.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
+.cat-icon{font-size:15px;flex-shrink:0;}
+
+/* ── SEARCH CONTROLS ── */
+.search-row{display:flex;gap:10px;align-items:center;margin-bottom:28px;flex-wrap:wrap;}
+.btn-search{
+  padding:12px 28px;background:var(--accent);color:#080b12;font-family:'Syne',sans-serif;
+  font-weight:800;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
+  border:none;border-radius:9px;cursor:pointer;transition:all 0.2s;white-space:nowrap;
+}
+.btn-search:hover{box-shadow:0 0 24px rgba(0,229,176,0.4);}
+.btn-search:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none;}
+.btn-more{
+  padding:11px 20px;background:transparent;border:1px solid var(--border);border-radius:9px;
+  color:var(--muted2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;
+  display:none;white-space:nowrap;
+}
+.btn-more:hover{border-color:var(--border2);color:var(--text);}
+
+/* ── RESULTS ── */
+.results-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px;
+}
+.results-meta span{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);}
+.results-meta em{font-style:normal;color:var(--accent);}
+.r-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;
+  margin-bottom:9px;display:flex;align-items:center;gap:18px;
+  transition:border-color 0.15s,background 0.15s;animation:fadeUp 0.3s ease both;
+}
+.r-card:hover{border-color:var(--border2);background:var(--card2);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.r-info{flex:1;min-width:0;}
+.r-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;}
+.r-addr{font-size:13px;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.r-phone{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);}
+.r-nophone{font-size:12px;color:var(--muted);font-style:italic;}
+.r-hours{font-size:11px;color:var(--muted2);margin-top:6px;line-height:1.6;}
+.r-hours summary{cursor:pointer;color:var(--muted);font-size:11px;list-style:none;display:flex;align-items:center;gap:5px;}
+.r-hours summary::before{content:'🕐';}
+.btn-call{display:block;padding:7px 16px;background:rgba(0,229,176,0.15);border:1px solid var(--accent);color:var(--accent);
+  border-radius:7px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;
+  text-decoration:none;text-align:center;white-space:nowrap;}
+.btn-call:hover{background:rgba(0,229,176,0.25);}
+.r-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+.cat-tag{font-size:11px;color:var(--muted2);background:var(--card2);padding:3px 9px;border-radius:5px;}
+.btn-add{
+  padding:7px 16px;background:transparent;border:1px solid var(--accent);color:var(--accent);
+  border-radius:7px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;
+  white-space:nowrap;
+}
+.btn-add:hover{background:var(--accent-dim);}
+.btn-add.done{border-color:var(--muted);color:var(--muted);cursor:default;pointer-events:none;}
+
+/* ── CRM ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:24px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;text-align:center;}
+.stat-n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;line-height:1;}
+.stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-top:4px;}
+
+.crm-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+.fsel{
+  padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:13px;outline:none;cursor:pointer;transition:border-color 0.2s;
+}
+.fsel:focus{border-color:var(--accent);}
+.fsearch{
+  padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:13px;outline:none;transition:border-color 0.2s;flex:1;min-width:180px;max-width:240px;
+}
+.fsearch:focus{border-color:var(--accent);}
+.fsearch::placeholder{color:var(--muted);}
+
+.lead-card{
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;
+  margin-bottom:10px;animation:fadeUp 0.3s ease both;transition:border-color 0.15s;
+}
+.lead-card:hover{border-color:var(--border2);}
+.lead-top{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+.lead-info{flex:1;min-width:200px;}
+.lead-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;}
+.lead-addr{font-size:13px;color:var(--muted2);margin-bottom:3px;}
+.lead-phone a{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);text-decoration:none;}
+.lead-phone a:hover{text-decoration:underline;}
+.lead-cattag{display:inline-block;font-size:11px;background:var(--blue-dim);color:var(--blue);padding:2px 9px;border-radius:5px;margin-top:6px;}
+.lead-controls{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.status-sel{
+  padding:8px 12px;border-radius:8px;font-size:12px;font-weight:700;
+  font-family:'Syne',sans-serif;letter-spacing:0.05em;border:none;cursor:pointer;
+  outline:none;transition:all 0.15s;
+}
+.btn-remove{
+  padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:7px;
+  color:var(--muted);font-size:11px;cursor:pointer;transition:all 0.15s;font-family:'Syne',sans-serif;
+  font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+}
+.btn-remove:hover{border-color:#e84869;color:#e84869;}
+.lead-bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;}
+.notes-inp{
+  flex:1;min-width:200px;padding:9px 13px;background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:13px;outline:none;transition:border-color 0.2s;
+}
+.notes-inp:focus{border-color:var(--accent);}
+.notes-inp::placeholder{color:var(--muted);}
+.date-inp{
+  padding:9px 13px;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:13px;outline:none;transition:border-color 0.2s;
+  color-scheme:dark;
+}
+.date-inp:focus{border-color:var(--accent);}
+
+/* ── STATES ── */
+.loading-st{text-align:center;padding:64px 20px;}
+.spinner{width:34px;height:34px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-st p{color:var(--muted2);font-size:14px;line-height:1.6;}
+.empty-st{text-align:center;padding:64px 20px;}
+.empty-st .ico{font-size:42px;margin-bottom:14px;}
+.empty-st p{color:var(--muted);font-size:15px;line-height:1.65;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;padding:12px 18px;background:var(--card2);
+  border:1px solid var(--accent);border-radius:10px;color:var(--text);font-size:13px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.5);z-index:9999;animation:toastIn 0.25s ease;
+  max-width:320px;
+}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── ERROR BOX ── */
+.err-box{
+  padding:16px 20px;background:rgba(232,72,105,0.08);border:1px solid rgba(232,72,105,0.3);
+  border-radius:10px;color:#e84869;font-size:14px;margin-bottom:16px;
+}
+
+@media(max-width:640px){
+  .setup-card{padding:32px 24px;}
+  .panel{padding:20px 16px;}
+  .topbar,.tabs-bar{padding-left:16px;padding-right:16px;}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SETUP SCREEN ══════════ -->
+<div id="setup">
+  <div class="setup-card">
+    <div class="logo-tag">Swansea Lead Finder</div>
+    <h1 class="setup-h1">Find businesses<br>without <em>websites.</em></h1>
+    <p class="setup-sub">Search every category across Swansea, filter out businesses that already have a website, and track every call from one dashboard.</p>
+
+    <div class="field-label">Google Places API Key</div>
+    <input class="field-input" id="key-in" type="password" placeholder="AIzaSy..." autocomplete="off">
+    <button class="btn-go" onclick="startApp()">Launch Lead Finder →</button>
+
+    <p class="setup-note">
+      Need a key? Visit <a href="https://console.cloud.google.com" target="_blank">console.cloud.google.com</a> → Create project → Enable <strong>Places API (New)</strong> → Credentials → Create API Key.<br><br>
+      Google gives <strong>$200 free credit/month</strong> — more than enough. No card needed to start.
+    </p>
+  </div>
+</div>
+
+<!-- ══════════ MAIN APP ══════════ -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">Swansea <em>Lead Finder</em></div>
+    <div class="key-badge" id="key-badge" title="Click to change API key" onclick="changeKey()">••••••••</div>
+  </div>
+
+  <div class="tabs-bar">
+    <button class="tab on" id="tab-search" onclick="switchTab('search')">🔍 Find Businesses</button>
+    <button class="tab" id="tab-leads" onclick="switchTab('leads')">📋 My Leads &nbsp;<span id="lead-count-badge" style="background:var(--accent);color:#080b12;border-radius:99px;padding:1px 7px;font-size:10px;">0</span></button>
+  </div>
+
+  <!-- ── SEARCH PANEL ── -->
+  <div class="panel on" id="panel-search">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="panel-title" style="margin-bottom:0">Select categories to search</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="selectAll()" style="padding:6px 14px;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);border-radius:7px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Select All</button>
+        <button onclick="selectNone()" style="padding:6px 14px;background:transparent;border:1px solid var(--border);color:var(--muted2);border-radius:7px;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Clear</button>
+      </div>
+    </div>
+    <div id="api-cost-warning" style="display:none;padding:10px 14px;background:rgba(240,160,48,0.1);border:1px solid rgba(240,160,48,0.3);border-radius:8px;color:#f0a030;font-size:12px;margin-bottom:14px;"></div>
+    <div class="cat-grid" id="cat-grid"></div>
+
+    <div class="search-row">
+      <button class="btn-search" id="btn-search" onclick="runSearch()">Search Swansea</button>
+      <button class="btn-more" id="btn-more" onclick="loadMore()">Load More Results</button>
+    </div>
+
+    <div id="search-output"></div>
+  </div>
+
+  <!-- ── LEADS PANEL ── -->
+  <div class="panel" id="panel-leads">
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="crm-toolbar">
+      <select class="fsel" id="filt-status" onchange="renderLeads()">
+        <option value="">All Statuses</option>
+        <option value="not_called">Not Called</option>
+        <option value="not_interested">Not Interested</option>
+        <option value="call_back">Call Back</option>
+        <option value="whatsapp_demo">WhatsApp Demo</option>
+        <option value="manager_not_in">Manager Not In</option>
+        <option value="callback_scheduled">Callback Scheduled</option>
+      </select>
+      <select class="fsel" id="filt-cat" onchange="renderLeads()">
+        <option value="">All Categories</option>
+      </select>
+      <input class="fsearch" id="filt-name" placeholder="Search by name…" oninput="renderLeads()">
+    </div>
+
+    <div id="leads-list"></div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let apiKey = '';
+let leads = [];
+let results = [];
+let selectedCats = [];
+let moreToken = null; // {token, cat}
+let busy = false;
+
+const CATS = [
+  // ── FOOD ──
+  {id:'fish_chips',    label:'Fish & Chip Shops',      icon:'🐟', queries:['fish and chip shop','chippy','fish supper shop']},
+  {id:'indian',        label:'Indian Restaurants',      icon:'🍛', queries:['Indian restaurant','curry house','Indian takeaway','tandoori restaurant','balti restaurant']},
+  {id:'chinese',       label:'Chinese Restaurants',     icon:'🥡', queries:['Chinese restaurant','Chinese takeaway','dim sum restaurant','noodle bar']},
+  {id:'italian',       label:'Italian & Pizza',         icon:'🍕', queries:['Italian restaurant','pizza restaurant','pizza takeaway','pasta restaurant']},
+  {id:'turkish',       label:'Turkish & Kebabs',        icon:'🥙', queries:['kebab shop','Turkish restaurant','Turkish takeaway','shish kebab shop','doner kebab']},
+  {id:'thai',          label:'Thai & Asian',            icon:'🍜', queries:['Thai restaurant','Vietnamese restaurant','Japanese restaurant','sushi restaurant','Korean restaurant','Malaysian restaurant']},
+  {id:'other_rest',    label:'Other Restaurants',       icon:'🍽️', queries:['Mexican restaurant','Greek restaurant','Caribbean restaurant','Portuguese restaurant','Spanish restaurant','burger restaurant','steakhouse','seafood restaurant','American diner']},
+  {id:'cafes',         label:'Cafés & Coffee Shops',    icon:'☕', queries:['café','coffee shop','tea room','breakfast café','brunch café','sandwich café']},
+  {id:'bakeries',      label:'Bakeries & Sweet Shops',  icon:'🧁', queries:['bakery','patisserie','cake shop','dessert shop','ice cream parlour','sweet shop','waffle house','donut shop']},
+  {id:'pubs',          label:'Pubs',                    icon:'🍺', queries:['pub','public house','local pub','village pub','gastropub']},
+  {id:'bars',          label:'Bars & Clubs',            icon:'🍸', queries:['bar','sports bar','wine bar','cocktail bar','nightclub','social club','working mens club','micropub','craft beer bar']},
+  // ── HAIR & BEAUTY ──
+  {id:'barbers',       label:'Barbers',                 icon:'💈', queries:['barber','barber shop','mens barber','gents barber','traditional barber','turkish barber']},
+  {id:'hair',          label:'Hair Salons',              icon:'✂️', queries:['hair salon','hairdresser','ladies hair salon','afro hair salon','hair stylist','hair colourist','hair extensions']},
+  {id:'beauty',        label:'Beauty Salons',            icon:'💄', queries:['beauty salon','beauty therapist','beauty clinic','mobile beauty therapist']},
+  {id:'nails',         label:'Nail Salons',              icon:'💅', queries:['nail salon','nail technician','nail bar','acrylic nails','gel nails','nail art']},
+  {id:'lashes',        label:'Lashes & Brows',           icon:'👁️', queries:['eyelash extensions','eyebrow threading','eyebrow microblading','lash lift','brow lamination','semi permanent makeup']},
+  {id:'tanning',       label:'Tanning & Waxing',         icon:'🌞', queries:['tanning salon','spray tan','sunbed salon','waxing salon','waxing studio','sugaring hair removal']},
+  {id:'massage',       label:'Massage & Wellbeing',      icon:'🧖', queries:['massage therapist','massage studio','spa','day spa','holistic therapist','reflexologist','aromatherapy']},
+  // ── FITNESS ──
+  {id:'gyms',          label:'Gyms',                    icon:'💪', queries:['gym','fitness centre','fitness club','health club','bodybuilding gym']},
+  {id:'fitness_studio',label:'Fitness Studios',          icon:'🏋️', queries:['personal trainer','fitness studio','bootcamp','crossfit gym','circuit training','functional fitness']},
+  {id:'yoga',          label:'Yoga & Pilates',           icon:'🧘', queries:['yoga studio','pilates studio','yoga classes','pilates classes','hot yoga','aerial yoga']},
+  {id:'martial',       label:'Martial Arts & Boxing',    icon:'🥊', queries:['boxing gym','martial arts','kickboxing','MMA gym','judo','karate','taekwondo','jiu jitsu']},
+  {id:'dance',         label:'Dance Studios',            icon:'💃', queries:['dance studio','dance school','dance classes','ballet school','ballroom dancing','salsa classes','street dance']},
+  // ── AUTOMOTIVE ──
+  {id:'garages',       label:'Car Garages & MOT',        icon:'🔧', queries:['car garage','MOT centre','car repair shop','auto repair garage','independent garage']},
+  {id:'tyres',         label:'Tyres & Exhausts',         icon:'🚗', queries:['tyre shop','tyre fitting','exhaust centre','windscreen repair','auto parts shop']},
+  {id:'bodyshop',      label:'Body Shop & Valeting',     icon:'✨', queries:['car body shop','panel beating','car valeting','car wash','mobile car valeting','car detailing']},
+  {id:'auto_other',    label:'Auto Electrician & Other', icon:'⚡', queries:['auto electrician','car air conditioning','car diagnostics','van conversion']},
+  // ── TRADES ──
+  {id:'plumbers',      label:'Plumbers',                 icon:'🔩', queries:['plumber','emergency plumber','boiler repair','heating engineer','gas engineer','central heating']},
+  {id:'electricians',  label:'Electricians',             icon:'💡', queries:['electrician','electrical contractor','domestic electrician','commercial electrician','solar panel installer']},
+  {id:'builders',      label:'Builders & General',       icon:'🏗️', queries:['builder','building contractor','extension builder','loft conversion','home renovation']},
+  {id:'trades_other',  label:'Other Trades',             icon:'🛠️', queries:['plasterer','painter decorator','roofer','carpenter','joiner','tiler','handyman','damp proofing','double glazing fitter','kitchen fitter','bathroom fitter','flooring specialist']},
+  {id:'scaffolding',   label:'Scaffolding & Groundworks',icon:'🏚️', queries:['scaffolding company','groundworks contractor','drainage specialist','excavation','demolition contractor']},
+  {id:'garden',        label:'Landscaping & Gardens',    icon:'🌿', queries:['landscaper','gardener','garden maintenance','tree surgeon','lawn care','fencing contractor','decking installer','artificial grass']},
+  // ── CLEANING ──
+  {id:'cleaning',      label:'Cleaning Companies',       icon:'🧹', queries:['cleaning company','domestic cleaner','domestic cleaning service','commercial cleaning company','office cleaning']},
+  {id:'specialist_clean',label:'Specialist Cleaning',    icon:'🧽', queries:['window cleaner','carpet cleaning','oven cleaning','pressure washing','gutter cleaning','end of tenancy cleaning','after builders cleaning']},
+  // ── RETAIL ──
+  {id:'fashion',       label:'Clothing & Fashion',       icon:'👗', queries:['clothing boutique','dress shop','fashion shop','vintage clothing shop','second hand clothing','ladies boutique','mens clothing shop','shoe shop']},
+  {id:'gifts',         label:'Gifts & Flowers',          icon:'💐', queries:['florist','flower shop','gift shop','card shop','candle shop','balloon shop']},
+  {id:'home_retail',   label:'Home & Interiors',         icon:'🏡', queries:['furniture shop','home decor shop','interiors shop','curtain shop','blinds shop','antique shop','second hand furniture']},
+  {id:'food_retail',   label:'Food & Drink Retail',      icon:'🛒', queries:['butcher','fishmonger','farm shop','deli','delicatessen','health food shop','off licence','wine shop','Polish shop','Asian supermarket']},
+  {id:'hobby_retail',  label:'Hobbies & Specialist',     icon:'🎯', queries:['pet shop','toy shop','book shop','record shop','music shop','art supply shop','craft shop','model shop','comic shop','gaming shop']},
+  {id:'tech_retail',   label:'Tech & Phone Repair',      icon:'📱', queries:['phone repair shop','phone shop','computer repair','laptop repair','electronics shop','phone case shop']},
+  {id:'other_retail',  label:'Other Retail',             icon:'🛍️', queries:['jewellery shop','watch shop','optician','garden centre','vape shop','tattoo supply shop','gun shop','fishing tackle shop','cycling shop','sports shop']},
+  // ── HEALTH ──
+  {id:'dentists',      label:'Dentists',                 icon:'🦷', queries:['dentist','dental practice','dental clinic','private dentist','orthodontist','cosmetic dentist']},
+  {id:'therapy',       label:'Physiotherapy & Chiro',    icon:'🦴', queries:['physiotherapist','chiropractor','osteopath','sports physio','podiatrist','podiatry clinic','sports therapist']},
+  {id:'alt_health',    label:'Alternative & Wellbeing',  icon:'🌿', queries:['acupuncturist','hypnotherapist','nutritionist','naturopath','homeopath','herbalist','life coach']},
+  {id:'mental_health', label:'Counselling & Therapy',    icon:'🧠', queries:['counsellor','psychotherapist','therapist','CBT therapist','marriage counsellor','bereavement counsellor']},
+  // ── CHILDCARE ──
+  {id:'nursery',       label:'Nurseries & Childcare',    icon:'👶', queries:['nursery','day nursery','childminder','preschool','playgroup','after school club','breakfast club','holiday club']},
+  // ── EDUCATION ──
+  {id:'tutors',        label:'Tutors',                   icon:'📚', queries:['tutor','tutoring centre','private tutor','maths tutor','English tutor','science tutor','11 plus tutor']},
+  {id:'music',         label:'Music Lessons',            icon:'🎸', queries:['music school','guitar lessons','piano lessons','drum lessons','singing lessons','violin lessons','music tutor']},
+  {id:'other_edu',     label:'Other Classes',            icon:'🎨', queries:['art classes','cookery classes','language school','driving instructor','sewing classes','pottery classes','photography classes']},
+  // ── ANIMALS ──
+  {id:'vets',          label:'Vets',                     icon:'🐕', queries:['vet','veterinary practice','animal hospital','exotic vet']},
+  {id:'pet_care',      label:'Pet Grooming & Care',      icon:'🐾', queries:['dog groomer','pet grooming','mobile dog groomer','dog walker','dog trainer','pet boarding','kennels','cattery']},
+  // ── ACCOMMODATION ──
+  {id:'hotels',        label:'Hotels & B&Bs',            icon:'🏨', queries:['hotel','bed and breakfast','guest house','boutique hotel','self catering','holiday let','hostel']},
+  // ── TRANSPORT ──
+  {id:'taxis',         label:'Taxis & Private Hire',     icon:'🚕', queries:['taxi company','cab company','minicab','private hire','taxi firm','executive car hire']},
+  {id:'transport',     label:'Minibus & Removal',        icon:'🚐', queries:['minibus hire','coach hire','removal company','man with van','courier service','same day delivery']},
+  // ── PROFESSIONAL ──
+  {id:'accountants',   label:'Accountants',              icon:'📊', queries:['accountant','bookkeeper','tax advisor','chartered accountant','payroll service','self assessment tax']},
+  {id:'legal',         label:'Solicitors & Legal',       icon:'⚖️', queries:['solicitor','law firm','legal services','conveyancing solicitor','will writing','family solicitor','employment solicitor']},
+  {id:'financial',     label:'Financial Services',       icon:'💰', queries:['mortgage broker','financial advisor','insurance broker','IFA','independent financial advisor','mortgage advisor']},
+  {id:'estate',        label:'Estate Agents',            icon:'🏠', queries:['estate agent','letting agent','property management','property investment']},
+  {id:'business_serv', label:'Business Services',        icon:'💼', queries:['printing company','sign maker','graphic designer','web designer','marketing agency','PR agency','recruitment agency','virtual assistant']},
+  // ── EVENTS & WEDDINGS ──
+  {id:'photo',         label:'Photographers',            icon:'📸', queries:['photographer','wedding photographer','portrait photographer','commercial photographer','photography studio','videographer']},
+  {id:'wedding',       label:'Wedding Services',         icon:'💒', queries:['wedding venue','wedding planner','wedding caterer','wedding florist','wedding dress shop','wedding cars','wedding DJ']},
+  {id:'events',        label:'Events & Entertainment',   icon:'🎉', queries:['event venue','party venue','function room hire','event planner','entertainment agency','DJ','mobile disco','catering company','bouncy castle hire']},
+  // ── TATTOO & PIERCING ──
+  {id:'tattoo',        label:'Tattoo & Piercing',        icon:'🎨', queries:['tattoo studio','tattoo parlour','tattoo artist','piercing studio','body piercing']},
+  // ── CARE ──
+  {id:'care',          label:'Care & Support Services',  icon:'🤝', queries:['home care agency','domiciliary care','supported living','care at home','elderly care','disability support']},
+];
+
+const STATUS = {
+  not_called:          {label:'Not Called',         bg:'#1a2240', text:'#8595b5'},
+  not_interested:      {label:'Not Interested',     bg:'#3d1525', text:'#e84869'},
+  call_back:           {label:'Call Back',           bg:'#3d2c0a', text:'#f0a030'},
+  whatsapp_demo:       {label:'WhatsApp Demo',       bg:'#0a3320', text:'#25d366'},
+  manager_not_in:      {label:'Manager Not In',      bg:'#3d2010', text:'#f07030'},
+  callback_scheduled:  {label:'Callback Scheduled',  bg:'#0d1f3d', text:'#4d8bf0'},
+};
+
+// ── INIT ──
+async function startApp() {
+  const k = document.getElementById('key-in').value.trim();
+  if (!k || !k.startsWith('AIza')) {
+    alert('Please enter a valid Google API key (starts with AIza...)');
+    return;
+  }
+  apiKey = k;
+  try { localStorage.setItem('swansea_api_key', k); } catch {}
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('key-badge').textContent = k.slice(0,10) + '…';
+  await loadLeads();
+  renderCats();
+  renderLeads();
+  renderStats();
+}
+
+function changeKey() {
+  if (!confirm('Change API key and reload?')) return;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('setup').style.display = 'flex';
+  document.getElementById('key-in').value = apiKey;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('key-in').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startApp();
+  });
+  // Auto-load saved key
+  try {
+    const saved = localStorage.getItem('swansea_api_key');
+    if (saved) document.getElementById('key-in').value = saved;
+  } catch {}
+});
+
+// ── STORAGE ──
+async function loadLeads() {
+  try {
+    const r = localStorage.getItem('swansea_leads_v2');
+    if (r) leads = JSON.parse(r);
+  } catch { leads = []; }
+  refreshBadge();
+}
+async function saveLeads() {
+  try { localStorage.setItem('swansea_leads_v2', JSON.stringify(leads)); } catch {}
+  refreshBadge();
+}
+function refreshBadge() {
+  document.getElementById('lead-count-badge').textContent = leads.length;
+}
+
+// ── TABS ──
+function switchTab(tab) {
+  document.getElementById('tab-search').classList.toggle('on', tab === 'search');
+  document.getElementById('tab-leads').classList.toggle('on', tab === 'leads');
+  document.getElementById('panel-search').classList.toggle('on', tab === 'search');
+  document.getElementById('panel-leads').classList.toggle('on', tab === 'leads');
+  if (tab === 'leads') { renderLeads(); renderStats(); }
+}
+
+// ── CATEGORIES ──
+function renderCats() {
+  document.getElementById('cat-grid').innerHTML = CATS.map(c => `
+    <button class="cat-btn ${selectedCats.includes(c.id) ? 'on' : ''}" onclick="toggleCat('${c.id}')">
+      <span class="cat-icon">${c.icon}</span>${c.label}
+    </button>`).join('');
+}
+function toggleCat(id) {
+  const i = selectedCats.indexOf(id);
+  i === -1 ? selectedCats.push(id) : selectedCats.splice(i, 1);
+  renderCats();
+  updateCostWarning();
+}
+function selectAll() {
+  selectedCats = CATS.map(c => c.id);
+  renderCats();
+  updateCostWarning();
+}
+function selectNone() {
+  selectedCats = [];
+  renderCats();
+  updateCostWarning();
+}
+function updateCostWarning() {
+  const warn = document.getElementById('api-cost-warning');
+  if (!warn) return;
+  const sel = selectedCats.map(id => CATS.find(c => c.id === id)).filter(Boolean);
+  const totalQ = sel.reduce((s, c) => s + c.queries.length, 0);
+  const calls = totalQ * ZONES.length;
+  const cost = (calls * 0.032).toFixed(2);
+  if (calls > 0) {
+    warn.style.display = 'block';
+    warn.innerHTML = `⚡ This search will make approx <strong>${calls.toLocaleString()} API calls</strong> (~$${cost} of your $200/month free credit). Full scan takes 2–5 minutes.`;
+  } else {
+    warn.style.display = 'none';
+  }
+}
+
+// ── SWANSEA ZONES ──
+const ZONES = [
+  {name:'Swansea City Centre', lat:51.6214, lng:-3.9436},
+  {name:'Mumbles',             lat:51.5731, lng:-3.9822},
+  {name:'Sketty',              lat:51.6089, lng:-4.0003},
+  {name:'Uplands Swansea',     lat:51.6267, lng:-3.9697},
+  {name:'Morriston',           lat:51.6567, lng:-3.9303},
+  {name:'Gorseinon',           lat:51.6689, lng:-4.0453},
+  {name:'Llansamlet',          lat:51.6450, lng:-3.8886},
+  {name:'Clydach',             lat:51.6758, lng:-3.9014},
+  {name:'Killay Swansea',      lat:51.6078, lng:-4.0356},
+  {name:'Penlan Swansea',      lat:51.6430, lng:-3.9750},
+  {name:'Fforestfach',         lat:51.6420, lng:-3.9980},
+  {name:'West Cross Swansea',  lat:51.5900, lng:-3.9970},
+];
+
+// ── SEARCH ──
+async function runSearch() {
+  if (selectedCats.length === 0) { showToast('⚠️ Select at least one category first'); return; }
+  if (busy) return;
+  busy = true;
+  results = [];
+  moreToken = null;
+  document.getElementById('btn-more').style.display = 'none';
+  const btn = document.getElementById('btn-search');
+  btn.disabled = true;
+  const selectedCatObjs = selectedCats.map(id => CATS.find(c => c.id === id)).filter(Boolean);
+  const totalQueries = selectedCatObjs.reduce((sum, c) => sum + c.queries.length, 0);
+  const total = totalQueries * ZONES.length;
+  let done = 0;
+
+  const updateStatus = () => {
+    document.getElementById('search-output').innerHTML = `
+      <div class="loading-st">
+        <div class="spinner"></div>
+        <p>Searching ${ZONES.length} areas across Swansea…<br>
+        <strong style="color:var(--accent)">${done} / ${total} searches complete — ${results.length} leads found so far</strong></p>
+      </div>`;
+  };
+  updateStatus();
+
+  for (const id of selectedCats) {
+    const cat = CATS.find(c => c.id === id);
+    if (!cat) continue;
+    for (const query of cat.queries) {
+      for (const zone of ZONES) {
+        btn.textContent = `${query} — ${zone.name}`;
+        await fetchPlaces(cat, query, zone);
+        done++;
+        updateStatus();
+      }
+    }
+  }
+
+  renderResults();
+  btn.disabled = false; btn.textContent = 'Search Swansea';
+  busy = false;
+}
+
+async function loadMore() {
+  if (!moreToken || busy) return;
+  busy = true;
+  const btn = document.getElementById('btn-more');
+  btn.textContent = 'Loading…'; btn.disabled = true;
+  await fetchPlaces(moreToken.cat, moreToken.query, moreToken.zone, moreToken.token);
+  moreToken = null;
+  document.getElementById('btn-more').style.display = 'none';
+  renderResults();
+  btn.textContent = 'Load More Results'; btn.disabled = false;
+  busy = false;
+}
+
+async function fetchPlaces(cat, queryStr, zone, pageToken) {
+  const z = zone || ZONES[0];
+  const currentQuery = pageToken ? (cat.queries[0]||'') : queryStr;
+  const body = {
+    textQuery: currentQuery + ' ' + z.name,
+    maxResultCount: 20,
+    locationBias: {
+      circle: { center: {latitude: z.lat, longitude: z.lng}, radius: 4000.0 }
+    }
+  };
+  if (pageToken) body.pageToken = pageToken;
+
+  try {
+    const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.websiteUri,places.businessStatus,places.regularOpeningHours,nextPageToken'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      const msg = err?.error?.message || `HTTP ${res.status}`;
+      document.getElementById('search-output').innerHTML = `
+        <div class="err-box">❌ API Error: ${esc(msg)}<br><small>Check your API key and ensure <strong>Places API (New)</strong> is enabled in Google Cloud Console.</small></div>`;
+      return;
+    }
+
+    const data = await res.json();
+    const places = data.places || [];
+    let added = 0;
+
+    places.forEach(p => {
+      if (p.websiteUri) return; // has website — skip
+      if (p.businessStatus && p.businessStatus !== 'OPERATIONAL') return;
+      if (results.find(r => r.id === p.id)) return; // dedup
+      const hours = p.regularOpeningHours?.weekdayDescriptions || [];
+      results.push({
+        id: p.id,
+        name: p.displayName?.text || 'Unknown',
+        address: p.formattedAddress || '',
+        phone: p.nationalPhoneNumber || '',
+        hours: hours,
+        category: cat.label,
+        catIcon: cat.icon,
+        catId: cat.id,
+      });
+      added++;
+    });
+
+    if (data.nextPageToken) {
+      moreToken = {token: data.nextPageToken, cat, query: currentQuery, zone: z};
+      document.getElementById('btn-more').style.display = 'inline-block';
+    }
+
+  } catch(e) {
+    document.getElementById('search-output').innerHTML =
+      `<div class="err-box">❌ Network error. Check your API key is valid and try again.</div>`;
+  }
+}
+
+function renderResults() {
+  const out = document.getElementById('search-output');
+  if (results.length === 0) {
+    out.innerHTML = `
+      <div class="empty-st">
+        <div class="ico">🔍</div>
+        <p>No businesses without websites found for your selected categories.<br>
+        Try different categories or check your API key.</p>
+      </div>`;
+    return;
+  }
+  const addedIds = new Set(leads.map(l => l.id));
+  const visible = results.filter(r => !addedIds.has(r.id));
+  out.innerHTML = `
+    <div class="results-meta">
+      <span><em>${visible.length}</em> businesses without websites (${results.length - visible.length} added to leads)</span>
+    </div>
+    ${visible.length === 0 ? '<div class="empty-st"><p>All results have been added to your leads!</p></div>' :
+    visible.map((r, i) => `
+    <div class="r-card" style="animation-delay:${Math.min(i*0.035, 1)}s">
+      <div class="r-info">
+        <div class="r-name">${r.catIcon} ${esc(r.name)}</div>
+        <div class="r-addr">${esc(r.address)}</div>
+        ${r.phone
+          ? `<div class="r-phone"><a class="btn-call" href="tel:${esc(r.phone)}">📞 Call ${esc(r.phone)}</a></div>`
+          : `<div class="r-nophone">No phone number listed</div>`}
+        ${r.hours && r.hours.length ? `
+        <details class="r-hours">
+          <summary>Opening Hours</summary>
+          ${r.hours.map(h => `<div>${esc(h)}</div>`).join('')}
+        </details>` : ''}
+      </div>
+      <div class="r-actions">
+        <span class="cat-tag">${esc(r.category)}</span>
+        <button class="btn-add" onclick="addLead('${r.id}')">+ Add Lead</button>
+      </div>
+    </div>`).join('')}`;
+}
+
+// ── LEADS ──
+function addLead(id) {
+  const b = results.find(r => r.id === id);
+  if (!b || leads.find(l => l.id === id)) return;
+  leads.unshift({
+    id: b.id, name: b.name, address: b.address, phone: b.phone,
+    hours: b.hours || [],
+    category: b.category, catIcon: b.catIcon, catId: b.catId,
+    status: 'not_called', notes: '', callbackDate: '',
+    addedAt: new Date().toISOString(),
+  });
+  saveLeads();
+  renderResults();
+  renderStats();
+  showToast(`✅ ${b.name} added to leads`);
+}
+
+async function setField(id, field, val) {
+  const l = leads.find(x => x.id === id);
+  if (!l) return;
+  l[field] = val;
+  await saveLeads();
+  renderStats();
+}
+
+async function removeLead(id) {
+  if (!confirm('Remove this lead?')) return;
+  leads = leads.filter(l => l.id !== id);
+  await saveLeads();
+  renderLeads(); renderStats(); renderResults();
+}
+
+function renderLeads() {
+  const sf = document.getElementById('filt-status').value;
+  const cf = document.getElementById('filt-cat').value;
+  const nf = document.getElementById('filt-name').value.toLowerCase();
+
+  // Rebuild category dropdown
+  const cats = [...new Set(leads.map(l => l.category))].sort();
+  const cfSel = document.getElementById('filt-cat');
+  const prevCf = cfSel.value;
+  cfSel.innerHTML = `<option value="">All Categories</option>` +
+    cats.map(c => `<option value="${esc(c)}" ${c===prevCf?'selected':''}>${esc(c)}</option>`).join('');
+
+  const filtered = leads.filter(l => {
+    if (sf && l.status !== sf) return false;
+    if (cf && l.category !== cf) return false;
+    if (nf && !l.name.toLowerCase().includes(nf)) return false;
+    return true;
+  });
+
+  const el = document.getElementById('leads-list');
+  if (leads.length === 0) {
+    el.innerHTML = `<div class="empty-st"><div class="ico">📋</div><p>No leads yet. Search for businesses and click <strong>+ Add Lead</strong> to start tracking.</p></div>`;
+    return;
+  }
+  if (filtered.length === 0) {
+    el.innerHTML = `<div class="empty-st"><p>No leads match your current filters.</p></div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map((l, i) => {
+    const st = STATUS[l.status] || STATUS.not_called;
+    const showDate = ['manager_not_in','callback_scheduled','call_back'].includes(l.status);
+    return `
+    <div class="lead-card" style="animation-delay:${Math.min(i*0.03,0.8)}s;border-left:3px solid ${st.text}">
+      <div class="lead-top">
+        <div class="lead-info">
+          <div class="lead-name">${l.catIcon||''} ${esc(l.name)}</div>
+          <div class="lead-addr">${esc(l.address)}</div>
+          ${l.phone ? `<div class="lead-phone">📞 <a href="tel:${esc(l.phone)}">${esc(l.phone)}</a></div>` : ''}
+          <span class="lead-cattag">${esc(l.category)}</span>
+        </div>
+        <div class="lead-controls">
+          <select class="status-sel" style="background:${st.bg};color:${st.text};"
+            onchange="setField('${l.id}','status',this.value);renderLeads()">
+            ${Object.entries(STATUS).map(([k,v]) =>
+              `<option value="${k}" ${l.status===k?'selected':''} style="background:#10141f;color:var(--text);">${v.label}</option>`
+            ).join('')}
+          </select>
+          <button class="btn-remove" onclick="removeLead('${l.id}')">✕ Remove</button>
+        </div>
+      </div>
+      <div class="lead-bottom">
+        <input class="notes-inp" placeholder="Notes about this call…"
+          value="${esc(l.notes)}"
+          onchange="setField('${l.id}','notes',this.value)">
+        ${showDate ? `
+          <input type="datetime-local" class="date-inp"
+            value="${l.callbackDate}"
+            title="Callback date &amp; time"
+            onchange="setField('${l.id}','callbackDate',this.value)">` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderStats() {
+  const counts = {};
+  Object.keys(STATUS).forEach(k => counts[k] = 0);
+  leads.forEach(l => { if (counts[l.status] !== undefined) counts[l.status]++; });
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat">
+      <div class="stat-n" style="color:var(--accent)">${leads.length}</div>
+      <div class="stat-l">Total Leads</div>
+    </div>
+    ${Object.entries(STATUS).map(([k,v]) => `
+    <div class="stat">
+      <div class="stat-n" style="color:${v.text}">${counts[k]}</div>
+      <div class="stat-l">${v.label}</div>
+    </div>`).join('')}`;
+}
+
+// ── UTILS ──
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTmr;
+function showToast(msg) {
+  document.querySelector('.toast')?.remove();
+  clearTimeout(toastTmr);
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  toastTmr = setTimeout(() => t.remove(), 3200);
+}
+</script>
+</body>
+</html>
